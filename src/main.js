@@ -29,7 +29,7 @@ rimLight.position.set(4, -1, 4);
 scene.add(rimLight);
 
 const sculpture = new THREE.Group();
-sculpture.rotation.set(-0.04, -0.14, -0.075);
+sculpture.rotation.set(-0.09, -0.24, -0.075);
 sculpture.position.set(-0.05, 0.08, 0);
 sculpture.scale.setScalar(0.88);
 scene.add(sculpture);
@@ -122,17 +122,43 @@ for (let row = 0; row < 32; row++) {
   strands.push({ mesh, baseOpacity: material.opacity, phase: seeded(row, 11) * Math.PI * 2 });
 }
 
-// Broken flecks around the ring keep the material painterly instead of machined.
-for (let i = 0; i < 76; i++) {
-  const angle = THREE.MathUtils.lerp(0.45, Math.PI * 2 - 0.48, seeded(i, 20));
-  const radius = 2.55 + seeded(i, 21) * 1.15;
+// A few denser dry-brush ribbons give the left and lower arc an asymmetric painted weight.
+for (let i = 0; i < 8; i++) {
+  const points = [];
+  const start = 2.0 + i * 0.035;
+  const end = 5.43 - i * 0.018;
+  const radius = 2.68 + i * 0.062;
+  for (let p = 0; p <= 74; p++) {
+    const t = p / 74;
+    points.push(ringPoint(THREE.MathUtils.lerp(start, end, t), radius, i + 210, t));
+  }
+  const curve = new THREE.CatmullRomCurve3(points);
+  const material = new THREE.MeshStandardMaterial({
+    color: palette[(i + 2) % palette.length],
+    roughness: 1,
+    metalness: 0,
+    transparent: true,
+    opacity: 0.13 + i * 0.012,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  });
+  const accent = new THREE.Mesh(makeBrushRibbon(curve, i + 50), material);
+  sculpture.add(accent);
+  strands.push({ mesh: accent, baseOpacity: material.opacity, phase: i * 0.7 });
+}
+
+// Sparse pigment flecks are distributed around the stroke rather than forming clusters.
+for (let i = 0; i < 34; i++) {
+  const progress = (i + 0.45) / 34;
+  const angle = THREE.MathUtils.lerp(0.56, Math.PI * 2 - 0.58, progress);
+  const radius = 2.72 + (seeded(i, 21) - 0.5) * 0.72;
   const size = 0.008 + seeded(i, 22) * 0.022;
   const geometry = new THREE.SphereGeometry(size, 5, 4);
   const material = new THREE.MeshBasicMaterial({ color: palette[i % palette.length], transparent: true, opacity: 0.25 + seeded(i, 23) * 0.5 });
   const fleck = new THREE.Mesh(geometry, material);
   fleck.position.copy(ringPoint(angle, radius, i + 70, seeded(i, 24)));
-  fleck.position.x += (seeded(i, 25) - 0.5) * 0.28;
-  fleck.position.y += (seeded(i, 26) - 0.5) * 0.28;
+  fleck.position.x += (seeded(i, 25) - 0.5) * 0.16;
+  fleck.position.y += (seeded(i, 26) - 0.5) * 0.16;
   sculpture.add(fleck);
 }
 
@@ -167,30 +193,31 @@ function addGlow(position, scale = 0.52, opacity = 0.55) {
   return sprite;
 }
 
-// Fine circuit paths rise from the lower brush and branch visibly inside the open ring.
+// Fine angular circuit paths rise from the lower brush and branch inside the opening.
 for (let i = 0; i < 11; i++) {
   const angle = 5.04 - i * 0.026;
   const radius = 2.72 + i * 0.052;
   const start = ringPoint(angle, radius, i + 120, 1);
   start.z += 0.18;
   const end = new THREE.Vector3(
-    2.28 + (i % 3) * 0.23,
-    -1.15 + i * 0.245,
+    2.22 + (i % 3) * 0.19,
+    -1.28 + i * 0.225,
     0.32 + i * 0.018
   );
-  const points = [
-    start,
-    new THREE.Vector3(start.x + 0.34, start.y + 0.16 + i * 0.012, start.z + 0.04),
-    new THREE.Vector3(2.02 + (i % 2) * 0.13, -1.55 + i * 0.13, 0.25),
-    end
-  ];
-  const curve = new THREE.CatmullRomCurve3(points);
+  const elbowA = new THREE.Vector3(start.x + 0.34, start.y + 0.03, start.z + 0.03);
+  const elbowB = new THREE.Vector3(start.x + 0.61, start.y + 0.30, 0.26);
+  const elbowC = new THREE.Vector3(elbowB.x, end.y - 0.18, end.z);
+  const elbowD = new THREE.Vector3(elbowC.x + 0.18, end.y, end.z);
+  const curve = new THREE.CurvePath();
+  [start, elbowA, elbowB, elbowC, elbowD, end].forEach((point, index, points) => {
+    if (index < points.length - 1) curve.add(new THREE.LineCurve3(point, points[index + 1]));
+  });
   const glowGeometry = new THREE.TubeGeometry(curve, 56, 0.022, 5, false);
   const glowMaterial = new THREE.MeshBasicMaterial({ color: '#e6ad4f', transparent: true, opacity: 0.055, blending: THREE.AdditiveBlending, depthWrite: false });
   sculpture.add(new THREE.Mesh(glowGeometry, glowMaterial));
 
   const geometry = new THREE.TubeGeometry(curve, 56, 0.007, 5, false);
-  const material = new THREE.MeshBasicMaterial({ color: i % 3 ? '#c88c34' : '#f1c875' });
+  const material = new THREE.MeshBasicMaterial({ color: i % 3 ? '#b98232' : '#d4a04a' });
   const trace = new THREE.Mesh(geometry, material);
   sculpture.add(trace);
 
@@ -242,8 +269,8 @@ function render() {
   const time = reducedMotion ? 1.3 : clock.getElapsedTime();
   pointer.lerp(targetPointer, 0.042);
 
-  sculpture.rotation.y += ((-0.14 + pointer.x * 0.17) - sculpture.rotation.y) * 0.035;
-  sculpture.rotation.x += ((-0.04 - pointer.y * 0.08) - sculpture.rotation.x) * 0.035;
+  sculpture.rotation.y += ((-0.24 + pointer.x * 0.19) - sculpture.rotation.y) * 0.035;
+  sculpture.rotation.x += ((-0.09 - pointer.y * 0.09) - sculpture.rotation.x) * 0.035;
   sculpture.rotation.z = -0.075 + Math.sin(time * 0.22) * 0.012;
   sculpture.position.y = 0.08 + Math.sin(time * 0.42) * 0.04;
 
