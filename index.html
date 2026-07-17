@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f7f4ef" />
+    <meta name="description" content="ArtisticGeek Studios — imagination, engineered." />
+    <title>ArtisticGeek Studios</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="site-header" aria-label="Primary navigation">
+        <a class="brand" href="#" aria-label="ArtisticGeek Studios home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 44 44" role="img">
+              <circle cx="22" cy="22" r="16.5" />
+              <path d="M29 31.5 34.5 37M31.8 28.2 39 30.5M30.8 24.6l8.1-.2" />
+              <circle class="node" cx="34.5" cy="37" r="1.35" />
+              <circle class="node" cx="39" cy="30.5" r="1.35" />
+              <circle class="node" cx="38.9" cy="24.4" r="1.35" />
+            </svg>
+          </span>
+          <span class="brand-copy">
+            <strong>ArtisticGeek</strong>
+            <small>STUDIOS LLP</small>
+          </span>
+        </a>
+
+        <button class="menu-button" type="button" aria-label="Menu" aria-expanded="false">
+          <span></span><span></span>
+        </button>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="eyebrow"><span></span> Creative technology studio</p>
+            <h1 id="hero-title">Where artistry<br />meets <em>intelligence.</em></h1>
+            <p class="intro">We create thoughtful digital experiences where imagination, craft, and technology move as one.</p>
+            <a class="explore" href="#canvas-story">
+              <span>Explore the studio</span>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" /></svg>
+            </a>
+          </div>
+
+          <div class="visual-wrap" id="canvas-story" aria-hidden="true">
+            <canvas id="wave-canvas"></canvas>
+            <div class="visual-halo"></div>
+            <p class="visual-label">IMAGINATION&nbsp;&nbsp;—&nbsp;&nbsp;ENGINEERED</p>
+          </div>
+
+          <div class="scroll-cue" aria-hidden="true">
+            <span>SCROLL</span><i></i>
+          </div>
+        </section>
+      </main>
+
+      <noscript>This experience needs JavaScript to render its interactive artwork.</noscript>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
