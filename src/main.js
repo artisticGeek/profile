@@ -46,8 +46,9 @@ function hybridPoints(row, count = 145) {
   const points = [];
   const radius = 2.62 + (row / 25 - 0.5) * 0.66 + (seeded(row, 2) - 0.5) * 0.13;
   const arcEndIndex = 91;
-  const startAngle = 0.58 + seeded(row, 7) * 0.12;
-  const endAngle = 5.08 - seeded(row, 8) * 0.12;
+  const transitionCount = 22;
+  const startAngle = 0.5 + seeded(row, 7) * 0.34;
+  const endAngle = 5.12 - seeded(row, 8) * 0.24;
 
   for (let i = 0; i < arcEndIndex; i++) {
     const t = i / (arcEndIndex - 1);
@@ -55,14 +56,28 @@ function hybridPoints(row, count = 145) {
   }
 
   const origin = points.at(-1);
-  const tailCount = count - arcEndIndex;
+  const incomingTangent = origin.clone().sub(points.at(-2)).normalize();
+  const transitionEnd = origin.clone().add(new THREE.Vector3(
+    1.42 + seeded(row, 13) * 0.2,
+    0.54 + (row / 25 - 0.5) * 0.16,
+    (row / 25 - 0.5) * 0.08
+  ));
+  const transition = new THREE.CubicBezierCurve3(
+    origin,
+    origin.clone().addScaledVector(incomingTangent, 0.72),
+    transitionEnd.clone().add(new THREE.Vector3(-0.55, -0.16, 0)),
+    transitionEnd
+  );
+  for (let i = 1; i <= transitionCount; i++) points.push(transition.getPoint(i / transitionCount));
+
+  const tailCount = count - arcEndIndex - transitionCount;
   for (let i = 1; i <= tailCount; i++) {
     const q = i / tailCount;
     const dissolve = 1 - q;
-    const x = origin.x + q * (4.35 + seeded(row, 12) * 0.7);
+    const x = transitionEnd.x + q * (2.8 + seeded(row, 12) * 0.55);
     const wave = Math.sin(q * Math.PI * 2.35 + row * 0.17) * (0.13 + q * 0.34);
-    const y = origin.y + q * (1.42 + (row / 25 - 0.5) * 0.45) + wave;
-    const z = origin.z + Math.sin(q * Math.PI * 2 + row * 0.35) * 0.18 * dissolve + (row / 25 - 0.5) * 0.18;
+    const y = transitionEnd.y + q * (0.73 + (row / 25 - 0.5) * 0.34) + wave;
+    const z = transitionEnd.z + Math.sin(q * Math.PI * 2 + row * 0.35) * 0.18 * dissolve + (row / 25 - 0.5) * 0.18;
     points.push(new THREE.Vector3(x, y, z));
   }
   return { points, arcEndIndex };
@@ -113,20 +128,39 @@ for (let row = 0; row < 26; row++) {
   sculpture.add(line);
   animatedLines.push({ line, row, arcEndIndex, baseOpacity: material.opacity });
 
-  if (row % 5 === 0) {
+  if (row % 4 === 0) {
     const ribbonMaterial = new THREE.MeshStandardMaterial({
       color: palette[(row + 2) % palette.length],
       roughness: 1,
       metalness: 0,
       transparent: true,
-      opacity: 0.16 + seeded(row, 30) * 0.14,
+      opacity: 0.18 + seeded(row, 30) * 0.13,
       side: THREE.DoubleSide,
       depthWrite: false
     });
-    const ribbon = new THREE.Mesh(makeRibbon(curve, row, 1.15), ribbonMaterial);
+    const ribbon = new THREE.Mesh(makeRibbon(curve, row, 1.42), ribbonMaterial);
     sculpture.add(ribbon);
     breathingMaterials.push({ material: ribbonMaterial, base: ribbonMaterial.opacity, phase: row });
   }
+}
+
+// Soft wave-only ribbons sit behind the circuit traces and preserve the painted material in the transformation.
+for (let i = 0; i < 5; i++) {
+  const source = curves[3 + i * 4];
+  const points = [];
+  for (let p = 0; p <= 72; p++) points.push(source.getPoint(THREE.MathUtils.lerp(0.58, 0.99, p / 72)));
+  const curve = new THREE.CatmullRomCurve3(points);
+  const material = new THREE.MeshStandardMaterial({
+    color: palette[(i + 3) % palette.length],
+    roughness: 1,
+    metalness: 0,
+    transparent: true,
+    opacity: 0.11 + i * 0.012,
+    side: THREE.DoubleSide,
+    depthWrite: false
+  });
+  sculpture.add(new THREE.Mesh(makeRibbon(curve, i + 130, 1.8), material));
+  breathingMaterials.push({ material, base: material.opacity, phase: i * 0.9 });
 }
 
 // Extra partial brush strokes weight the circular origin while leaving the outgoing wave airy.
