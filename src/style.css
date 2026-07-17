@@ -74,10 +74,10 @@ h1 em { color: var(--gold-deep); font-weight: inherit; }
 .explore svg { width: 22px; fill: none; stroke: var(--gold-deep); stroke-width: 1.2; transition: transform .25s ease; }
 .explore:hover svg { transform: translateX(5px); }
 
-.visual-wrap { position: absolute; inset: 8% 0 3% 44%; overflow: hidden; }
+.visual-wrap { position: absolute; inset: 9% 2% 7% 47%; overflow: visible; }
 #wave-canvas { width: 100%; height: 100%; display: block; cursor: crosshair; }
 .visual-halo { position: absolute; width: 62%; aspect-ratio: 1; left: 19%; top: 18%; border-radius: 50%; background: radial-gradient(circle, rgba(201,160,99,.18), rgba(201,160,99,.035) 47%, transparent 70%); filter: blur(48px); pointer-events: none; }
-.visual-label { position: absolute; right: 8%; bottom: 7%; margin: 0; color: rgba(92,75,52,.65); font-size: 8px; font-weight: 600; letter-spacing: .3em; }
+.visual-label { position: absolute; right: 0; bottom: 0; margin: 0; color: rgba(92,75,52,.58); font-size: 8px; font-weight: 600; letter-spacing: .3em; }
 .scroll-cue { position: absolute; left: clamp(24px, 5vw, 78px); bottom: 52px; display: flex; align-items: center; gap: 13px; transform: rotate(-90deg); transform-origin: left center; }
 .scroll-cue span { color: #82796e; font-size: 7px; letter-spacing: .35em; }
 .scroll-cue i { width: 38px; height: 1px; background: var(--gold); display: block; position: relative; overflow: hidden; }
@@ -93,7 +93,7 @@ noscript { position: fixed; bottom: 10px; left: 10px; font-size: 12px; }
   h1 { font-size: clamp(49px, 14vw, 74px); }
   .intro { max-width: 400px; margin-top: 24px; }
   .explore { margin-top: 26px; }
-  .visual-wrap { inset: 40% -20% -3% -4%; opacity: 1; }
+  .visual-wrap { inset: 41% -12% 1% -1%; opacity: 1; overflow: hidden; }
   .visual-label { right: 14%; bottom: 4%; }
   .scroll-cue { display: none; }
 }
@@ -105,7 +105,7 @@ noscript { position: fixed; bottom: 10px; left: 10px; font-size: 12px; }
   .eyebrow { font-size: 8px; margin-bottom: 20px; }
   h1 { font-size: clamp(44px, 13.8vw, 61px); }
   .intro { font-size: 13px; line-height: 1.65; max-width: 340px; }
-  .visual-wrap { inset: 48% -42% -4% -18%; }
+  .visual-wrap { inset: 49% -30% 0 -12%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
